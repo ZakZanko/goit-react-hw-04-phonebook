@@ -1,73 +1,63 @@
-import { Component } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
-import s from './ContactForm.module.css';
+import styles from './ContactForm.module.css';
 
-const INITIAL_STATE = { name: '', tel: '' };
+export default function MyForm({ onSubmitForm }) {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
 
-class ContactForm extends Component {
-  state = INITIAL_STATE;
-
-  handleChange = e => {
-    const { name, value } = e.target;
-    this.setState({ [name]: value });
-  };
-
-  handleSubmit = e => {
+  const onSubmit = e => {
     e.preventDefault();
-    const { onAdd, onCheckforUniqName } = this.props;
-    const { name, tel } = this.state;
-
-    const checkUniqName = onCheckforUniqName(name);
-    if (!checkUniqName) return;
-
-    if (!(name && tel)) {
-      alert('Empty field');
-      return;
-    }
-
-    onAdd({ id: uuidv4(), name, tel });
-    this.reset();
+    onSubmitForm({ name, number });
+    formReset();
   };
 
-  reset = () => {
-    this.setState(INITIAL_STATE);
+  const formReset = () => {
+    setName('');
+    setNumber('');
   };
 
-  render() {
-    return (
-      <form className={s.form} onSubmit={this.handleSubmit}>
-        <label className={s.label}>
-          Name
-          <input
-            className={s.input}
-            type="text"
-            name="name"
-            value={this.state.name}
-            onChange={this.handleChange}
-          />
-        </label>
-        <label className={s.label}>
-          Number
-          <input
-            className={s.input}
-            type="tel"
-            name="tel"
-            value={this.state.tel}
-            onChange={this.handleChange}
-          />
-        </label>
-        <button className={s.btnAddContact} type="submit">
-          Add contact
-        </button>
-      </form>
-    );
-  }
+  const onChangeName = e => {
+    setName(e.currentTarget.value);
+  };
+
+  const onChangeTel = e => {
+    setNumber(e.currentTarget.value);
+  };
+
+  return (
+    <form onSubmit={onSubmit} className={styles.form}>
+      <label className={styles.lebels}>
+        Name:
+        <input
+          type="text"
+          onChange={onChangeName}
+          value={name}
+          name="name"
+          pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
+          title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
+          required
+        />
+      </label>
+      <label className={styles.lebels}>
+        Number:
+        <input
+          type="tel"
+          value={number}
+          onChange={onChangeTel}
+          name="number"
+          pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
+          title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
+          required
+        />
+      </label>
+      <button type="submit" onSubmit={onSubmit} className={styles.btn}>
+        Add contact
+      </button>
+    </form>
+  );
 }
 
-ContactForm.propTypes = {
-  onAdd: PropTypes.func,
-  onCheckforUniqName: PropTypes.func,
+MyForm.propTypes = {
+  onSubmitForm: PropTypes.func.isRequired,
 };
-
-export default ContactForm;
